@@ -59,26 +59,25 @@ export const requireSignin = expressjwt({
 });
 
 
-export const authMiddleware = async (req, res, next) => {
-    try {
-        const authUserId = req.auth._id;
-        const user = await User.findById(authUserId).exec();
-        if (!user) {return res.status(400).json({error: 'User not found' }); }
-            
-        req.profile = user;
-        next();
-    } catch (error) {return res.status(500).json({error: 'Internal server error'});}   
-    
-};
 
 export const adminMiddleware = async (req, res, next) => {
     try {
         const adminUserId = req.auth._id;
         const user = await User.findById(adminUserId).exec();
-
         if (!user) {return res.status(400).json({error: 'User not found'});}
         if (user.role !== 1) {return res.status(400).json({error: 'Admin resource. Access denied'}); }
+        req.profile = user;
+        next();
+    } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 
+};
 
+
+export const superadminMiddleware = async (req, res, next) => {
+    try {
+        const adminUserId = req.auth._id;
+        const user = await User.findById(adminUserId).exec();
+        if (!user) {return res.status(400).json({error: 'User not found'});}
+        if (user.username !== 'simar18') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
         req.profile = user;
         next();
     } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 

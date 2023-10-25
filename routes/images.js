@@ -38,6 +38,6 @@ export const remove = async (req, res) => {
 
 router.post('/uploadimages', requireSignin, adminMiddleware, uploadimages);
 router.get('/allimages', allimages);
-router.delete('/images/:url', remove);
+router.delete('/images/:url', requireSignin, adminMiddleware, remove);
 
 export default router

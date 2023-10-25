@@ -6,9 +6,9 @@ const ImageSchema = new mongoose.Schema(
             type: String,
         }
     },
-    {
-        timestamps: true  
-      }
+    {timestamps: true  }
+        
+      
 );
 
 export default mongoose.model('Images', ImageSchema);

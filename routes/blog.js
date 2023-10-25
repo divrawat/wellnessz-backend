@@ -5,7 +5,7 @@ import { requireSignin, adminMiddleware } from "../controllers/auth.js"
 
 router.post('/blog', requireSignin, adminMiddleware, create);
 router.get('/blogs', list);
-router.get('/allblogs', allblogs)
+router.get('/allblogs', allblogs);
 router.get('/blogs-categories-tags', listAllBlogsCategoriesTags);
 router.get('/blog/:slug', read);
 router.delete('/blog/:slug', requireSignin, adminMiddleware, remove);

@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { requireSignin, authMiddleware, adminMiddleware } from "../controllers/auth.js";
+import { requireSignin, adminMiddleware } from "../controllers/auth.js";
 import { read, publicProfile, update, photo } from "../controllers/user.js";
 
 router.get('/user/profile', requireSignin, adminMiddleware, read);

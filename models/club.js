@@ -3,10 +3,18 @@ import crypto from "crypto";
 
 const clubSchema = new mongoose.Schema(
     {
+        name: {
+            type: String,
+            trim: true,
+            required: true,
+            index:true
+        },
         username: {
             type: String,
             trim: true,
             required: true,
+            unique: true,
+            index:true
         },
         phonenumber: {
             type: Number,
@@ -17,7 +25,8 @@ const clubSchema = new mongoose.Schema(
             trim: true,
             required: true,
             unique: true,
-            lowercase: true
+            lowercase: true,
+            index:true
         },
         hashed_password: {
             type: String,
@@ -28,7 +37,7 @@ const clubSchema = new mongoose.Schema(
             type: String,
         }
     },
-    { timestamp: true }
+    {timestamps: true  }
 );
 
 clubSchema
