@@ -22,9 +22,8 @@ const loginvalidator = [ check('email').isEmail().withMessage('Must be a valid e
 router.post('/register', registervalidator, runvalidation, requireSignin, adminMiddleware, registerController);
 router.post('/login', loginvalidator, runvalidation, loginConroller);
 router.get('/allclubusers', listallclubusers);
-router.delete('/users/:username',requireSignin, superadminMiddleware, remove);
 router.get('/users/:username', read);
-
+router.delete('/users/:username',requireSignin, superadminMiddleware, remove);
 router.patch('/user/update/:username', requireSignin, superadminMiddleware, update);
 
 
