@@ -36,12 +36,17 @@ export const create = async (req, res) => {
             blog.date = date;
             blog.photo = photo;
             blog.excerpt = excerpt0;
-            blog.postedBy = req.auth._id; 
+            blog.postedBy = req.auth._id;
             await blog.save();
-            const updatedBlog = await Blog.findByIdAndUpdate( blog._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec();
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${blog.slug}`, { method: 'POST' });
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
+            const updatedBlog = await Blog.findByIdAndUpdate(blog._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec();
             res.json(updatedBlog);
+
+
+
+            setTimeout(() => {
+                fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${blog.slug}`, { method: 'POST' });
+                fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
+            }, 250);
         });
     } catch (error) { res.status(400).json({ "Error": "Something Went Wrong" }) }
 };
@@ -79,8 +84,11 @@ export const update = async (req, res) => {
             const result = await oldBlog.save();
             res.json(result);
 
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${result.slug}`, { method: 'POST' });
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
+
+            setTimeout(() => {
+                fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${result.slug}`, { method: 'POST' });
+                fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
+            }, 250);
 
         });
     } catch (error) { return res.status(500).json({ error: 'Internal Server Error' }) }
@@ -98,8 +106,10 @@ export const remove = async (req, res) => {
         if (!data) { return res.json({ error: 'Blog not found' }); }
         res.json({ message: 'Blog deleted successfully' });
 
-        await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${slug}`, { method: 'POST' });
-        await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' })
+        setTimeout(() => {
+            fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${slug}`, { method: 'POST' });
+         fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' })
+        }, 250);
 
     } catch (error) { res.json({ "error": "Something went wrong" }) }
 };

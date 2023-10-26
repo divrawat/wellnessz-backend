@@ -77,7 +77,7 @@ export const superadminMiddleware = async (req, res, next) => {
         const adminUserId = req.auth._id;
         const user = await User.findById(adminUserId).exec();
         if (!user) {return res.status(400).json({error: 'User not found'});}
-        if (user.username !== 'simar18') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
+        if (user.username !== 'divrawat') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
         req.profile = user;
         next();
     } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 
