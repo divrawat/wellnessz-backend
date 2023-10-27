@@ -14,6 +14,7 @@ const clubSchema = new mongoose.Schema(
             trim: true,
             required: true,
             unique: true,
+            lowercase: true,
             index:true
         },
         phonenumber: {
