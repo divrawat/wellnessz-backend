@@ -114,6 +114,6 @@ export const update = async (req, res) => {
         await user.save();
 
         res.json({ message: 'User updated successfully' });
-    } catch (err) { res.status(400).json({ error: 'Failed to update user' }); }
+    } catch (err) { res.status(400).json({ error: console.log(err) }); }
 };
 

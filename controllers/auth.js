@@ -1,4 +1,4 @@
-import User from "../models/user.js";
+import Admin from "../models/admin.js";
 import jwt from "jsonwebtoken";
 import _ from "lodash";
 import { expressjwt } from "express-jwt";
@@ -8,15 +8,13 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const signup = async (req, res) => {
     try {
-        const emailExists = await User.findOne({ email: req.body.email });
+        const emailExists = await Admin.findOne({ email: req.body.email });
         if (emailExists) { return res.status(400).json({error: 'Email is taken'});    }
 
-        const usernameExists = await User.findOne({ username: req.body.username });
+        const usernameExists = await Admin.findOne({ username: req.body.username });
         if (usernameExists) {  return res.status(400).json({error: 'Username is taken'});}
            
         const { name, username, email, password } = req.body;
-        let usernameurl = username.toLowerCase();
-        let profile = `${process.env.CLIENT_URL}/profile/${usernameurl}`;
 
         const newUser = new User({ name, username, email, password, profile });
         await newUser.save();
@@ -30,7 +28,7 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
     try {
         const { password } = req.body;
-        const user = await User.findOne({ email: req.body.email }).exec();
+        const user = await Admin.findOne({ email: req.body.email }).exec();
 
         if (!user) { return res.status(400).json({ error: 'User with that email does not exist. Please signup.'}); }
         if (!user.authenticate(password)) { return res.status(400).json({ error: 'Email and password do not match.'});}
@@ -43,6 +41,97 @@ export const signin = async (req, res) => {
         return res.json({token, user: { _id, username, name, email, role }});
     } catch (error) {return res.status(500).json({error: 'Internal server error'});  }   
 };
+ 
+  
+
+export const listalladmins = async (req, res) => {
+    try {
+        const totalCount = await Admin.countDocuments({}).exec();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 6;
+        const skip = (page - 1) * perPage;
+        const data = await Admin.find({}).sort({ createdAt: -1 }).select('_id name username email role').skip(skip).limit(perPage).exec();
+        res.json({ totalAdmins: totalCount, data });
+    } catch (err) { console.error('Error fetching Admins:', err); res.status(500).json({ error: 'Internal Server Error' }); }
+};
+
+
+
+export const remove = async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (username) {
+            const deletedUSer = await Admin.findOneAndDelete({ username }).exec();
+            if (deletedUSer) {
+                res.json({ message: 'Admin deleted successfully' });
+            } else { res.status(404).json({ error: 'Admin Cannot be found or deleted' }); }
+        }
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Cannot delete Admin' }); }
+};
+
+
+export const read = async (req, res) => {
+    try {
+        const username = req.params.username.toLowerCase();
+        const data = await Admin.findOne({ username })
+            .select('_id name username email role');
+        if (!data) { return res.status(404).json({ error: 'Admin not found' }) }
+        res.json(data);
+    } catch (error) { res.status(404).json({ error: 'Admin not found' }) }
+};
+
+
+
+
+export const update = async (req, res) => {
+    try {
+        const username = req.params.username;
+        const updatedFields = req.body;
+        console.log(req.body);
+
+        const user = await Admin.findOne({ username });
+        if (!user) { return res.status(400).json({ error: 'User not found' }); }
+
+        const { password } = req.body;
+        function validatePassword(password) {
+            const lowercaseRegex = /[a-z]/;
+            const uppercaseRegex = /[A-Z]/;
+            const numericRegex = /[0-9]/;
+            const specialCharRegex = /[!@#$%^&*]/;
+            return (
+                password.length >= 8 &&
+                lowercaseRegex.test(password) &&
+                uppercaseRegex.test(password) &&
+                numericRegex.test(password) &&
+                specialCharRegex.test(password)
+            );
+        }
+
+        if (password && !validatePassword(password)) {
+            return res.status(400).json({
+                error: 'Password should contain at least 1 lowercase, 1 uppercase, 1 numeric, 1 special character, and must be 8 characters or longer.',
+            });
+        }
+
+        Object.assign(user, updatedFields);
+        await user.save();
+
+        res.json({ message: 'Admin updated successfully' });
+    } catch (err) { res.status(400).json({ error: console.log(err) }); }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -63,7 +152,7 @@ export const requireSignin = expressjwt({
 export const adminMiddleware = async (req, res, next) => {
     try {
         const adminUserId = req.auth._id;
-        const user = await User.findById(adminUserId).exec();
+        const user = await Admin.findById(adminUserId).exec();
         if (!user) {return res.status(400).json({error: 'User not found'});}
         if (user.role !== 1) {return res.status(400).json({error: 'Admin resource. Access denied'}); }
         req.profile = user;
@@ -75,7 +164,7 @@ export const adminMiddleware = async (req, res, next) => {
 export const superadminMiddleware = async (req, res, next) => {
     try {
         const adminUserId = req.auth._id;
-        const user = await User.findById(adminUserId).exec();
+        const user = await Admin.findById(adminUserId).exec();
         if (!user) {return res.status(400).json({error: 'User not found'});}
         if (user.username !== 'divrawat') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
         req.profile = user;
@@ -88,7 +177,7 @@ export const superadminMiddleware = async (req, res, next) => {
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const user = await Admin.findOne({ email });
 
         if (!user) {return res.status(401).json({error: 'User with that email does not exist'}); }
         const token = jwt.sign({ _id: user._id }, process.env.JWT_RESET_PASSWORD, { expiresIn: '10m' });
@@ -121,7 +210,7 @@ export const resetPassword = async (req, res) => {
             const decoded = jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD);
 
             if (decoded) {
-                const user = await User.findOne({ resetPasswordLink });
+                const user = await Admin.findOne({ resetPasswordLink });
 
                 if (!user) {return res.status(401).json({error: 'Something went wrong. Try later'});   }
                 const updatedFields = {password: newPassword,resetPasswordLink: '' };

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
 
-const userSchema = new mongoose.Schema(
+const AdminSchema = new mongoose.Schema(
     {
         name: {
             type: String,
@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema(
             trim: true,
             required: true,
             unique: true,
-            lowercase: true
+            lowercase: true,
+            index:true
         },
         hashed_password: {
             type: String,
@@ -34,7 +35,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: Number,
-            default: 0
+            default: 1
         },
         resetPasswordLink: {
             data: String,
@@ -43,7 +44,7 @@ const userSchema = new mongoose.Schema(
     },
 );
 
-userSchema
+AdminSchema
     .virtual('password')
     .set(function (password) {
         this._password = password;
@@ -54,7 +55,7 @@ userSchema
         return this._password;
     });
 
-userSchema.methods = {
+    AdminSchema.methods = {
     authenticate: function (plainText) { return this.encryptPassword(plainText) === this.hashed_password; },
     encryptPassword: function (password) {
         if (!password) return '';
@@ -67,5 +68,5 @@ userSchema.methods = {
     makeSalt: function () { return Math.round(new Date().valueOf() * Math.random()) + ''; }
 };
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model('Admin', AdminSchema);
 

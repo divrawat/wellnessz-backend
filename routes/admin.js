@@ -1,10 +1,10 @@
 import express from "express";
 const router = express.Router();
-import { signup, signin, signout, forgotPassword,resetPassword } from "../controllers/auth.js"
+import { signup, signin, signout, forgotPassword,resetPassword, listalladmins, remove, update, read, requireSignin, superadminMiddleware } from "../controllers/auth.js"
 import { runvalidation } from "../validators/index.js"
 import { check } from "express-validator";
   
-const usersignupvalidator = [
+const adminsignupvalidator = [
     check('name').isLength({ min: 5 }).withMessage('Name of more than 5 characters is required '),
     check('username').isLength({ min: 3, max: 15 }).withMessage('Username of more than 3 and less than 15 characters is required '),
     check('email').isEmail().withMessage('Must be a valid email address'),
@@ -16,13 +16,21 @@ const resetPasswordValidator = [
 ]
 
 
-const usersigninvalidator = [ check('email').isEmail().withMessage('Must be a valid email address') ]
+const adminsigninvalidator = [ check('email').isEmail().withMessage('Must be a valid email address') ]
 const forgotPasswordValidator = [ check('email').not().isEmpty().isEmail().withMessage('Must be a valid email address')  ];
 
-// router.post('/pre-signup', usersignupvalidator, runvalidation, preSignup);
-router.post('/signup', usersignupvalidator, runvalidation, signup)
-router.post('/signin', usersigninvalidator, runvalidation, signin)
+
+router.post('/signup', adminsignupvalidator, runvalidation,requireSignin, superadminMiddleware, signup)
+router.post('/signin', adminsigninvalidator, runvalidation, signin)
 router.get('/signout', signout);
+
+
+router.get('/alladmins', listalladmins);
+router.get('/admin/:username', read);
+router.delete('/admin/:username',requireSignin, superadminMiddleware, remove);
+router.patch('/admin/update/:username', requireSignin, superadminMiddleware, update);
+
+
 
 router.put('/forgot-password', forgotPasswordValidator, runvalidation, forgotPassword);
 router.put('/reset-password', resetPasswordValidator, runvalidation, resetPassword);

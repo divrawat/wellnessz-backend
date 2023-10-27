@@ -6,7 +6,7 @@ import { runvalidation } from "../validators/index.js"
 import { check } from "express-validator";
 
 
-
+  
 const registervalidator = [
     check('name').isLength({ min: 3 }).withMessage('Name of more than 3 characters is required '),
     check('username').isLength({ min: 3 }).withMessage('Username of more than 3 characters is required')
@@ -21,6 +21,8 @@ const loginvalidator = [ check('email').isEmail().withMessage('Must be a valid e
 
 router.post('/register', registervalidator, runvalidation, requireSignin, adminMiddleware, registerController);
 router.post('/login', loginvalidator, runvalidation, loginConroller);
+
+
 router.get('/allclubusers', listallclubusers);
 router.get('/users/:username', read);
 router.delete('/users/:username',requireSignin, superadminMiddleware, remove);
