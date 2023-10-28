@@ -14,12 +14,12 @@ export const signup = async (req, res) => {
         const usernameExists = await Admin.findOne({ username: req.body.username });
         if (usernameExists) {  return res.status(400).json({error: 'Username is taken'});}
            
-        const { name, username, email, password } = req.body;
+        const { name, username, email, password, role } = req.body;
 
-        const newUser = new User({ name, username, email, password, profile });
+        const newUser = new Admin({ name, username, email, password, role });
         await newUser.save();
 
-        res.json({message: 'Signup success! Please signin.'});
+        res.json({message: 'Admin has been created'});
     } catch (err) {return res.status(400).json({error: err.message});}  
 };
 
@@ -166,7 +166,7 @@ export const superadminMiddleware = async (req, res, next) => {
         const adminUserId = req.auth._id;
         const user = await Admin.findById(adminUserId).exec();
         if (!user) {return res.status(400).json({error: 'User not found'});}
-        if (user.username !== 'divrawat') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
+        if (user.username !== 'simar18') {return res.status(400).json({error: 'Super Admin resource. Access denied'}); }
         req.profile = user;
         next();
     } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 

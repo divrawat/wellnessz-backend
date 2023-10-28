@@ -42,7 +42,7 @@ const blogSchema = new mongoose.Schema(
         categories: [{ type: ObjectId, ref: 'Category', required: true }],
         postedBy: {
             type: ObjectId,
-            ref: 'User'
+            ref: 'Admin'
         }
     },
 );

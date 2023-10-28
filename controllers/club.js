@@ -84,7 +84,6 @@ export const update = async (req, res) => {
     try {
         const username = req.params.username;
         const updatedFields = req.body;
-        console.log(req.body);
 
         const user = await ClubUser.findOne({ username });
         if (!user) { return res.status(400).json({ error: 'User not found' }); }
@@ -113,7 +112,7 @@ export const update = async (req, res) => {
         Object.assign(user, updatedFields);
         await user.save();
 
-        res.json({ message: 'User updated successfully' });
+        res.json({ message: 'Club User updated successfully' });
     } catch (err) { res.status(400).json({ error: console.log(err) }); }
 };
 

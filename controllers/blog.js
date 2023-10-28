@@ -150,7 +150,7 @@ export const listAllBlogsCategoriesTags = async (req, res) => {
             .select('_id photo title slug excerpt categories date postedBy');
         const categories = await Category.find({});
         res.json({ blogs, categories, size: blogs.length });
-    } catch (error) { res.json({ error: errorHandler(error) }) }
+    } catch (error) { res.json({ error: "Something Went Wrong" }) }
 };
 
 
