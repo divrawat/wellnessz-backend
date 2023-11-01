@@ -68,18 +68,19 @@ export const update = async (req, res) => {
             if (err) { return res.status(400).json({ error: 'Image could not upload' }); }
 
             _.merge(oldBlog, fields);
+            console.log(fields);
 
-            const { title, mtitle, mdesc, body, categories } = fields;
+            const { title, mtitle, mdesc, body, categories, slug } = fields;
 
             if (mtitle === '') { return res.status(400).json({ error: 'MTitle is required' }) }
             if (title === '') { return res.status(400).json({ error: 'title is required' }) }
             if (mdesc === '') { return res.status(400).json({ error: 'Mdesc is required' }) }
-            if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
-
+            
             const strippedContent = striptags(body);
             const excerpt = strippedContent.slice(0, 150);
             if (body) { oldBlog.excerpt = excerpt; }
             if (categories) { oldBlog.categories = categories.split(',').map(category => category.trim()) }
+            if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
 
             const result = await oldBlog.save();
             res.json(result);
