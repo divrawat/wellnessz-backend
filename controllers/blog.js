@@ -1,10 +1,11 @@
-import Blog from "../models/blog.js"
-import Category from "../models/category.js"
-import _ from "lodash"
-import formidable from "formidable"
-import slugify from "slugify"
+import Blog from "../models/blog.js";
+import Category from "../models/category.js";
+import _ from "lodash";
+import formidable from "formidable";
+import slugify from "slugify";
 import striptags from 'striptags';
 import "dotenv/config.js";
+import { format } from 'date-fns';
 
 export const create = async (req, res) => {
     try {
@@ -33,7 +34,9 @@ export const create = async (req, res) => {
             blog.slug = slugify(slug).toLowerCase();
             blog.mtitle = mtitle;
             blog.mdesc = mdesc;
-            blog.date = date;
+            const mydate = new Date(date);
+            const formattedDate = format(mydate, 'dd MMM, yyyy');
+            blog.date = formattedDate;
             blog.photo = photo;
             blog.excerpt = excerpt0;
             blog.postedBy = req.auth._id;
@@ -46,7 +49,7 @@ export const create = async (req, res) => {
             setTimeout(() => {
                 fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${blog.slug}`, { method: 'POST' });
                 fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
-            }, 250);
+            }, 300);
         });
     } catch (error) { res.status(400).json({ "Error": "Something Went Wrong" }) }
 };
@@ -70,7 +73,7 @@ export const update = async (req, res) => {
             _.merge(oldBlog, fields);
             console.log(fields);
 
-            const { title, mtitle, mdesc, body, categories, slug } = fields;
+            const { title, mtitle, mdesc, body, categories, slug, date } = fields;
 
             if (mtitle === '') { return res.status(400).json({ error: 'MTitle is required' }) }
             if (title === '') { return res.status(400).json({ error: 'title is required' }) }
@@ -82,6 +85,13 @@ export const update = async (req, res) => {
             if (categories) { oldBlog.categories = categories.split(',').map(category => category.trim()) }
             if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
 
+            if (date){
+                const mydate = new Date(date);
+                const formattedDate = format(mydate, 'dd MMM, yyyy');
+                console.log(formattedDate);
+                oldBlog.date=formattedDate;
+            }
+
             const result = await oldBlog.save();
             res.json(result);
 
@@ -89,7 +99,7 @@ export const update = async (req, res) => {
             setTimeout(() => {
                 fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${result.slug}`, { method: 'POST' });
                 fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' });
-            }, 250);
+            }, 300);
 
         });
     } catch (error) { return res.status(500).json({ error: 'Internal Server Error' }) }
@@ -110,7 +120,7 @@ export const remove = async (req, res) => {
         setTimeout(() => {
             fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs/${slug}`, { method: 'POST' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/blogs`, { method: 'POST' })
-        }, 250);
+        }, 300);
 
     } catch (error) { res.json({ "error": "Something went wrong" }) }
 };
