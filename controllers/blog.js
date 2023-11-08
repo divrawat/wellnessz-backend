@@ -5,7 +5,6 @@ import formidable from "formidable";
 import slugify from "slugify";
 import striptags from 'striptags';
 import "dotenv/config.js";
-import { format } from 'date-fns';
 
 export const create = async (req, res) => {
     try {
@@ -34,9 +33,7 @@ export const create = async (req, res) => {
             blog.slug = slugify(slug).toLowerCase();
             blog.mtitle = mtitle;
             blog.mdesc = mdesc;
-            const mydate = new Date(date);
-            const formattedDate = format(mydate, 'dd MMM, yyyy');
-            blog.date = formattedDate;
+            blog.date = date;
             blog.photo = photo;
             blog.excerpt = excerpt0;
             blog.postedBy = req.auth._id;
@@ -73,7 +70,7 @@ export const update = async (req, res) => {
             _.merge(oldBlog, fields);
             console.log(fields);
 
-            const { title, mtitle, mdesc, body, categories, slug, date } = fields;
+            const { title, mtitle, mdesc, body, categories, slug } = fields;
 
             if (mtitle === '') { return res.status(400).json({ error: 'MTitle is required' }) }
             if (title === '') { return res.status(400).json({ error: 'title is required' }) }
@@ -84,13 +81,6 @@ export const update = async (req, res) => {
             if (body) { oldBlog.excerpt = excerpt; }
             if (categories) { oldBlog.categories = categories.split(',').map(category => category.trim()) }
             if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
-
-            if (date){
-                const mydate = new Date(date);
-                const formattedDate = format(mydate, 'dd MMM, yyyy');
-                console.log(formattedDate);
-                oldBlog.date=formattedDate;
-            }
 
             const result = await oldBlog.save();
             res.json(result);
@@ -179,11 +169,27 @@ export const read = async (req, res) => {
 };
 
 
-export const listRelated = async (req, res) => {
+// export const listRelated = async (req, res) => {
+//     try {
+//         const { _id, categories } = req.body.blog;
+//         const blogs = await Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
+//             .limit(6).populate('postedBy', '_id name username').select('title photo slug date postedBy');
+//         res.json(blogs);
+//     } catch (error) { return res.status(400).json({ error: 'Blogs not found' }) }
+// };
+
+
+export const relatedposts = async (req, res) => {
     try {
-        const { _id, categories } = req.body.blog;
-        const blogs = await Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
-            .limit(6).populate('postedBy', '_id name username').select('title photo slug date postedBy');
-        res.json(blogs);
-    } catch (error) { return res.status(400).json({ error: 'Blogs not found' }) }
-};
+      const slug = req.params.slug.toLowerCase();
+      const blogpost = await Blog.findOne({ slug }).exec();
+      if (!blogpost) {return res.status(404).json({ error: 'Blog not found' });}
+        
+      const categories = blogpost.categories;
+  
+      const data = await Blog.find({ _id: { $ne: blogpost._id },categories: { $in: categories }, })
+        .populate('postedBy', '_id name username profile').select('title slug postedBy date photo').limit(6);
+        
+      res.status(200).json(data);
+    } catch (err) { res.status(500).json({ error: "Something Went Wrong" });}
+  };
