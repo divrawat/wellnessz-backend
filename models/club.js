@@ -29,6 +29,10 @@ const clubSchema = new mongoose.Schema(
             lowercase: true,
             index:true
         },
+        role: {
+            type: Number,
+            default: 1
+        },
         hashed_password: {
             type: String,
             required: true

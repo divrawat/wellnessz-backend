@@ -1,4 +1,5 @@
 import Admin from "../models/admin.js";
+import ClubUser from "../models/club.js";
 import jwt from "jsonwebtoken";
 import _ from "lodash";
 import { expressjwt } from "express-jwt";
@@ -122,19 +123,6 @@ export const update = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const signout = (req, res) => {
     res.clearCookie('token');
     res.json({message: 'Signout success'});  
@@ -155,6 +143,18 @@ export const adminMiddleware = async (req, res, next) => {
         const user = await Admin.findById(adminUserId).exec();
         if (!user) {return res.status(400).json({error: 'User not found'});}
         if (user.role !== 1) {return res.status(400).json({error: 'Admin resource. Access denied'}); }
+        req.profile = user;
+        next();
+    } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 
+};
+
+
+export const clubclientmiddleware = async (req, res, next) => {
+    try {
+        const clientUserId = req.auth._id;
+        const user = await ClubUser.findById(clientUserId).exec();
+        if (!user) {return res.status(400).json({error: 'ClubUser not found'});}
+        if (user) {return res.status(400).json({error: 'ClubResource resource. Access denied'}); }
         req.profile = user;
         next();
     } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 

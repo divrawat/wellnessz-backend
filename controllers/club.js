@@ -116,3 +116,10 @@ export const update = async (req, res) => {
     } catch (err) { res.status(400).json({ error: console.log(err) }); }
 };
 
+
+
+export const addclient = async (req, res) => {
+    try {
+        
+    } catch (err) { return res.status(400).json({ error: err.message }); }
+}

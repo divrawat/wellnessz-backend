@@ -1,11 +1,9 @@
 import express from "express";
 const router = express.Router();
-import { registerController, loginConroller, listallclubusers, remove, read, update } from "../controllers/club.js";
-import { superadminMiddleware, adminMiddleware, requireSignin } from "../controllers/auth.js";
+import { registerController, loginConroller, listallclubusers, remove, read, update, addclient } from "../controllers/club.js";
+import { superadminMiddleware, adminMiddleware, requireSignin, clubclientmiddleware } from "../controllers/auth.js";
 import { runvalidation } from "../validators/index.js"
 import { check } from "express-validator";
-
-
   
 const registervalidator = [
     check('name').isLength({ min: 3 }).withMessage('Name of more than 3 characters is required '),
@@ -17,8 +15,6 @@ const registervalidator = [
 ]
 
 const loginvalidator = [ check('email').isEmail().withMessage('Must be a valid email address') ]
-
-
 router.post('/register', registervalidator, runvalidation, requireSignin, adminMiddleware, registerController);
 router.post('/login', loginvalidator, runvalidation, loginConroller);
 
@@ -27,6 +23,9 @@ router.get('/allclubusers', listallclubusers);
 router.get('/users/:username', read);
 router.delete('/users/:username',requireSignin, superadminMiddleware, remove);
 router.patch('/user/update/:username', requireSignin, superadminMiddleware, update);
+
+
+router.post('/client/addclient', requireSignin, clubclientmiddleware, addclient);
 
 
 export default router
