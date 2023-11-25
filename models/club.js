@@ -31,7 +31,7 @@ const clubSchema = new mongoose.Schema(
         },
         role: {
             type: Number,
-            default: 1
+            default: 3
         },
         hashed_password: {
             type: String,
