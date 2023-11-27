@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema;
 
 const ClientSchema = new mongoose.Schema(
     {
@@ -16,8 +17,11 @@ const ClientSchema = new mongoose.Schema(
             index: true,
         },
         joiningdate: {
-            type: Date,
+            type: String,
             index: true,
+        },
+        url:{
+            type: String,
         },
 
         phonenumber: {
@@ -25,7 +29,8 @@ const ClientSchema = new mongoose.Schema(
         },
         sponsoredby: {
             type: String,
-        }
+        },
+        postedBy: {type: ObjectId, ref: 'ClientClients'}
     },
 );
 

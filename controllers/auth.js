@@ -154,7 +154,7 @@ export const clubclientmiddleware = async (req, res, next) => {
         const clientUserId = req.auth._id;
         const user = await ClubUser.findById(clientUserId).exec();
         if (!user) {return res.status(400).json({error: 'ClubUser not found'});}
-        if (user) {return res.status(400).json({error: 'ClubResource resource. Access denied'}); }
+        if (user.role!==3) {return res.status(400).json({error: 'ClubResource resource. Access denied'}); }
         req.profile = user;
         next();
     } catch (error) { return res.status(500).json({error: 'Internal server error'}); } 

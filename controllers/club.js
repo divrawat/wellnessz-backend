@@ -1,5 +1,6 @@
-import ClubUser from "../models/club.js"
+import ClubUser from "../models/club.js";
 import jwt from "jsonwebtoken";
+import ClientClients from "../models/clientclients.js"
 
 export const registerController = async (req, res) => {
     try {
@@ -120,6 +121,49 @@ export const update = async (req, res) => {
 
 export const addclient = async (req, res) => {
     try {
-        
+
+        const { name, joiningdate, email, phonenumber, url, city, sponsoredby } = req.body;
+
+        const emailExists = await ClientClients.findOne({ email });
+        if (emailExists) { return res.status(400).json({ error: 'Email is taken' }); }
+
+        const newClient = new ClientClients({ name, joiningdate, url, phonenumber, email, city, sponsoredby });
+        await newClient.save();
+
+        res.json({ message: 'Client has been Added' });
+
     } catch (err) { return res.status(400).json({ error: err.message }); }
 }
+
+
+export const allusernames = async (req, res) => {
+    try {
+        const data = await ClubUser.find({}).select('_id username').exec();
+        res.json(data);
+    } catch (err) { console.error('Error fetching Usernames:', err); res.status(500).json({ error: 'Internal Server Error' }); }
+};
+
+
+
+
+export const checkusername = async (req, res) => {
+    const { username } = req.query;
+
+    if (!username) {
+        return res.status(400).json({ error: 'Username parameter missing' });
+    }
+
+    try {
+        const user = await ClubUser.find({username}).exec();
+        if (user) {
+            return res.json({ exists: true });
+          } else {
+            return res.json({ exists: false });
+          }
+    } catch (err) { console.error('Username does not exists:', err); res.status(500).json({ error: 'Internal Server Error' }); }
+
+
+
+};
+
+
