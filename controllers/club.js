@@ -1,6 +1,6 @@
 import ClubUser from "../models/club.js";
 import jwt from "jsonwebtoken";
-import ClientClients from "../models/clientclients.js"
+import ClientClients from "../models/clientclients.js";
 
 export const registerController = async (req, res) => {
     try {
