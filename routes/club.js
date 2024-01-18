@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { registerController, loginConroller, listallclubusers, remove, read, update, addclient, allusernames, checkusername, removeInterestedCoach, InterestedRegister, listallInterestedCoach } from "../controllers/club.js";
+import { registerController, loginConroller, listallclubusers,createClubeUser, remove, read, update, addclient, allusernames, checkusername, removeInterestedCoach, InterestedRegister, listallInterestedCoach } from "../controllers/club.js";
 import { superadminMiddleware, adminMiddleware, requireSignin, clubclientmiddleware } from "../controllers/auth.js";
 import { runvalidation } from "../validators/index.js";
 import { check } from "express-validator";
@@ -41,5 +41,7 @@ router.patch('/user/update/:username', requireSignin, superadminMiddleware, upda
 router.post('/client/addclient', requireSignin, clubclientmiddleware, addclient);
 
 router.get('/username-exists', checkusername)
+
+router.post('/createclubuser', createClubeUser);
 
 export default router

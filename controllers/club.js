@@ -98,10 +98,6 @@ export const listallclubusers = async (req, res) => {
 
 
 
-
-
-
-
 export const remove = async (req, res) => {
     try {
         const { username } = req.query;
@@ -219,9 +215,22 @@ export const checkusername = async (req, res) => {
             return res.json({ exists: false });
           }
     } catch (err) { console.error('Username does not exists:', err); res.status(500).json({ error: 'Internal Server Error' }); }
-
-
-
 };
 
 
+export const  createClubeUser=async(req,res)=>{
+    try {
+        const { name, username, email, city, phonenumber } = req.body;
+
+        const newUser = new Interested({ name, username, email, city, phonenumber });
+      const newCoch=  await newUser.save();
+        return res.status(200).json({
+            status: true,
+            data: newCoch,
+            message: 'Request Sent  successfully',
+        });
+    } catch (error) {
+          console.error(error);
+            return res.status(400).json({ success: false, msg: error.message });
+    }
+}
