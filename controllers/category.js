@@ -1,6 +1,6 @@
 import Category from '../models/category.js';
-import slugify from "slugify"
-import Blog from "../models/blog.js"
+import slugify from "slugify";
+import Blog from "../models/blog.js";
 
 export const create = async (req, res) => {
     try {

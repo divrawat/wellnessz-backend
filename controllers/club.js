@@ -1,4 +1,5 @@
 import ClubUser from "../models/club.js";
+import Interested from "../models/interested.js";
 import jwt from "jsonwebtoken";
 import ClientClients from "../models/clientclients.js";
 
@@ -25,6 +26,30 @@ export const registerController = async (req, res) => {
 
 
 
+
+
+export const InterestedRegister = async (req, res) => {
+    try {
+        const emailExists = await Interested.findOne({ email: req.body.email });
+        if (emailExists) { return res.status(400).json({ error: 'Email is taken' }); }
+
+        const usernameExists = await Interested.findOne({ username: req.body.username });
+        if (usernameExists) { return res.status(400).json({ error: 'Username is taken' }); }
+
+        const { name, username, email, city, phonenumber } = req.body;
+
+        const newUser = new Interested({ name, username, email, city, phonenumber });
+        await newUser.save();
+
+        res.json({ message: 'Interested Coach has been created' });
+    } catch (err) { return res.status(400).json({ error: err.message }); }
+};
+
+
+
+
+
+
 export const loginConroller = async (req, res) => {
     try {
 
@@ -43,6 +68,20 @@ export const loginConroller = async (req, res) => {
 };
 
 
+export const listallInterestedCoach = async (req, res) => {
+    try {
+        const totalCount = await Interested.countDocuments({}).exec();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 6;
+        const skip = (page - 1) * perPage;
+        const data = await Interested.find({}).sort({ createdAt: -1 }).select('_id name username email phonenumber city createdAt').skip(skip).limit(perPage).exec();
+        res.json({ totalInterestedCoaches: totalCount, data });
+    } catch (err) { console.error('Error fetching images:', err); res.status(500).json({ error: 'Internal Server Error' }); }
+};
+
+
+
+
 export const listallclubusers = async (req, res) => {
     try {
         const totalCount = await ClubUser.countDocuments({}).exec();
@@ -53,6 +92,14 @@ export const listallclubusers = async (req, res) => {
         res.json({ totalclubUsers: totalCount, data });
     } catch (err) { console.error('Error fetching images:', err); res.status(500).json({ error: 'Internal Server Error' }); }
 };
+
+
+
+
+
+
+
+
 
 
 export const remove = async (req, res) => {
@@ -68,6 +115,17 @@ export const remove = async (req, res) => {
 };
 
 
+export const removeInterestedCoach = async (req, res) => {
+    try {
+        const { username } = req.query;
+        if (username) {
+            const deletedUSer = await Interested.findOneAndDelete({ username }).exec();
+            if (deletedUSer) {
+                res.json({ message: 'Interested Coach deleted successfully' });
+            } else { res.status(404).json({ error: 'Interested Coach Cannot be found or deleted' }); }
+        }
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Cannot delete Interested Coach' }); }
+};
 
 
 export const read = async (req, res) => {
